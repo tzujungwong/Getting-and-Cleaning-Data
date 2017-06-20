@@ -29,9 +29,9 @@ feature <- gsub("-mean?\\()", "Mean",feature)
 feature <- gsub("-std?\\()", "Std",feature)
 feature <- gsub("Acc", "-Accelerometer-", feature)
 feature <- sub("Gyro", "-Gyroscope-", feature)
-colnames(Totaldata) <- c("subject", "label", feature)
+colnames(totaldata) <- c("subject", "label", feature)
 
-tidydata <- aggregate(. ~subject + label, Totaldata, mean)
+tidydata <- aggregate(. ~subject + label, totaldata, mean)
 tidydata <- tidydata[with(tidydata, order(subject, label)), ]
 
 write.table(tidydata, "tidydata.txt",row.names = FALSE, quote = FALSE )
