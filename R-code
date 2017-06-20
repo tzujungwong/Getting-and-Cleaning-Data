@@ -1,0 +1,37 @@
+download.file(url = "https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip"
+              , destfile = paste(path, "dataFiles.zip", sep = "/"))
+unzip(zipfile = "dataFiles.zip")
+
+train_gcd <- read.table("/Users/tzujung/Documents/R_Coursera/UCI\ HAR\ Dataset/train/X_train.txt")
+test_gcd <- read.table("/Users/tzujung/Documents/R_Coursera/UCI\ HAR\ Dataset/test/X_test.txt")
+Totaldata <- rbind(train_gcd, test_gcd)
+
+features_gcd <- read.table("/Users/tzujung/Documents/R_Coursera/UCI\ HAR\ Dataset/features.txt")
+features_gcd[,2] <- as.character(features_gcd[,2])
+
+features1 <- grep("*mean*|*std*", features_gcd[,2])
+feature_name <- features_gcd[features1,2]
+
+Totaldata1 <- Totaldata[,features1]
+y_train <- read.table("/Users/tzujung/Documents/R_Coursera/UCI\ HAR\ Dataset/train/y_train.txt")
+sub_train <- read.table("/Users/tzujung/Documents/R_Coursera/UCI\ HAR\ Dataset/train/subject_train.txt")
+train <- cbind(sub_train, y_train)
+y_test <- read.table("/Users/tzujung/Documents/R_Coursera/UCI\ HAR\ Dataset/test/y_test.txt")
+sub_test <- read.table("/Users/tzujung/Documents/R_Coursera/UCI\ HAR\ Dataset/test/subject_test.txt")
+test <- cbind(sub_test, y_test)
+Totaltraintest <- rbind(train, test)
+Totaldata <- cbind(Totaltraintest, Totaldata1)
+
+
+labelactivity <- read.table("/Users/tzujung/Documents/R_Coursera/UCI\ HAR\ Dataset/activity_labels.txt")
+labelactivity[,2] <- as.character(labelactivity[,2])
+Totaldata[2] <- labelactivity[,2][match(Totaldata[,2], labelactivity[,1])]
+feature_name <- gsub("-mean?\\()", "Mean",feature_name)
+feature_name <- gsub("-std?\\()", "Std",feature_name)
+feature_name <- gsub("Acc", "-Accelerometer-", feature_name)
+feature_name <- sub("Gyro", "-Gyroscope-", feature_name)
+colnames(Totaldata) <- c("subject", "labelactivity", feature_name)
+
+tidydata <- aggregate(. ~subject + labelactivity, Totaldata, mean)
+tidydata <- tidydata[with(tidydata, order(subject, labelactivity)), ]
+write.table(tidydata, "tidydata.txt",row.names = FALSE )
